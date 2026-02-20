@@ -328,10 +328,12 @@ class TestMessageParser:
         assert "Message missing 'type' field" in str(exc_info.value)
 
     def test_parse_unknown_message_type(self):
-        """Test that unknown message type raises MessageParseError."""
-        with pytest.raises(MessageParseError) as exc_info:
-            parse_message({"type": "unknown_type"})
-        assert "Unknown message type: unknown_type" in str(exc_info.value)
+        """Test that unknown message types return None instead of raising."""
+        result = parse_message({"type": "unknown_type"})
+        assert result is None
+
+        result = parse_message({"type": "rate_limit_event"})
+        assert result is None
 
     def test_parse_user_message_missing_fields(self):
         """Test that user message with missing fields raises MessageParseError."""
@@ -359,7 +361,7 @@ class TestMessageParser:
 
     def test_message_parse_error_contains_data(self):
         """Test that MessageParseError contains the original data."""
-        data = {"type": "unknown", "some": "data"}
+        data = {"not_type": "missing"}
         with pytest.raises(MessageParseError) as exc_info:
             parse_message(data)
         assert exc_info.value.data == data
